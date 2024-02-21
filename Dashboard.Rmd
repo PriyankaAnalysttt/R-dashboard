@@ -1,0 +1,78 @@
+---
+title: "Top Instagrammers of the world"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(knitr)
+library(rpivotTable)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+data <- read.csv("top_1000_instagrammers.csv")
+```
+
+
+Interactive Dashboard
+==================================================
+
+Row
+-------------------------------------------
+
+### Instagrammers
+
+```{r}
+valueBox(paste("Influencers"),
+         color='danger')
+```
+
+
+### Number of Influencers
+
+```{r}
+valueBox(length(data$Rank),
+         icon = "fa-user")
+```
+
+### Number of Countries
+
+```{r}
+unique_audience_count <- length(unique(data$Audience))
+
+valueBox(unique_audience_count, "Countries")
+```
+
+### Categories
+
+```{r}
+unique_count <- length(unique(data$Category))
+
+valueBox(unique_count)
+```
+### Chart A
+
+```{r}
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
+
