@@ -22,14 +22,17 @@ data <- read.csv("top_1000_instagrammers.csv")
 Interactive Dashboard
 ==================================================
 
-Row
+Row(Height=60)
 -------------------------------------------
 
-### Instagrammers
+
+
+### Instagram
 
 ```{r}
 valueBox(paste("Influencers"),
-         color='danger')
+         color='danger',
+         icon="fa-Instagram")
 ```
 
 
@@ -55,24 +58,317 @@ unique_count <- length(unique(data$Category))
 
 valueBox(unique_count)
 ```
-### Chart A
+
+Column
+---------------------
+
+
+
+### Influencer with highest followers
+
 
 ```{r}
 
+sorted_data <- data[order(data$Followers..Millions., decreasing=TRUE), ]
+
+top_N <- 10
+top_N_data <- head(sorted_data, n = top_N)
+
+# Create a bar chart
+bar_chart <- ggplot(top_N_data, aes(x = reorder(Name, Followers..Millions.), y = Followers..Millions.)) +
+  geom_bar(stat = "identity", width = 0.5, fill=("red")) +
+  labs(title = paste("Top", top_N, "Instagrammers by Followers"),
+       x = "Influencers",
+       y = "No.of Followers (Millions)") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 20),
+        axis.text.x = element_text(size = 15, angle = 90),
+        axis.text.y = element_text(size = 15),
+        axis.title = element_text(size = 18))
+
+
+print(bar_chart)
+
 ```
 
-Column {data-width=350}
------------------------------------------------------------------------
+### Engagement vs Followers
 
-### Chart B
+```{r}
+ggplot(data, aes(x = Followers..Millions., y = Engagement.1000s.)) +
+  geom_point(data = subset(data, Engagement.1000s. < 3000 & Followers..Millions. < 150)) +
+  labs(title = "Followers vs. Authentic Engagement",
+       x = "no. of Followers (Millions)",
+       y = "Authentic Engagement (1000s)") +
+  theme_gray() +
+  theme(plot.title = element_text(size = 22),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title = element_text(size = 18))
+
+
+```
+
+### Audience Country
 
 ```{r}
 
+country_counts <- table(data$Audience.Country)
+
+# Convert the country counts to a data frame
+country_df <- data.frame(country = names(country_counts), count = as.numeric(country_counts))
+
+# Sort the data frame by count in descending order
+country_df <- country_df[order(country_df$count, decreasing = TRUE), ]
+
+# Create a pie chart
+pie_chart <- ggplot(country_df, aes(x = "", y = count, fill = country)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Distribution of Instagram Accounts
+       by Audience Country",
+       fill = "Audience Country") +
+  theme_void() +
+  theme(legend.position = "right")
+
+# Print the pie chart
+print(pie_chart)
+
 ```
 
-### Chart C
+Column
+-----------------------
+
+### Category vs Country
 
 ```{r}
 
+category_country_counts <- table(data$Category, data$Audience.Country)
+
+# Convert the counts to a data frame
+category_country_df <- as.data.frame.matrix(category_country_counts)
+
+# Convert row names to a column
+category_country_df$Country <- rownames(category_country_df)
+
+# Reshape the data to long format
+category_country_long <- tidyr::gather(category_country_df, key = "Category", value = "Count", -Country)
+
+# Create a stacked bar chart
+stacked_bar <- ggplot(category_country_long, aes(x = Country, y = Count, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(
+       x = "Country",
+       y = "Count") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 22),
+        axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 15),
+        axis.title = element_text(size = 18),
+        legend.title = element_blank())
+
+# Print the stacked bar chart
+print(stacked_bar)
+
+
 ```
+
+
+### Engagement vs Followers vs Categories
+
+```{r}
+bubble_chart <- ggplot(data, aes(x = Category , y = Engagement.1000s., color = Followers..Millions.)) +
+  geom_point(data = subset(data, Engagement.1000s. < 4000), alpha = 0.7) +  # Set transparency for points
+  scale_size_continuous(range = c(3, 15)) +  # Adjust size range for bubbles
+  labs(
+       x = "Category",
+       y = "Engagement",
+       color = "Followers") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 22),
+        axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 15),
+        axis.title = element_text(size = 18))
+
+# Print the bubble chart
+print(bubble_chart)
+```
+
+### Distributuion of Categories
+
+```{r}
+
+category_counts <- table(data$Category)
+
+category_df <- data.frame(Category = names(category_counts), Count = as.numeric(category_counts))
+
+# Create a pie chart
+pie_chart <- ggplot(category_df, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Distribution of Instagram
+    Accounts by Category",
+       fill = "Category") +
+  theme_void() +
+  theme(legend.position = "right")
+
+# Print the pie chart
+print(pie_chart)
+```
+
+
+Country & Category
+=======================================
+
+Column
+------------------------
+
+
+### Distributuion of Categories
+
+```{r}
+
+category_counts <- table(data$Category)
+
+category_df <- data.frame(Category = names(category_counts), Count = as.numeric(category_counts))
+
+# Create a pie chart
+pie_chart <- ggplot(category_df, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Distribution of Instagram
+    Accounts by Category",
+       fill = "Category") +
+  theme_void() +
+  theme(legend.position = "right")
+
+# Print the pie chart
+print(pie_chart)
+```
+
+### Audience Country
+
+```{r}
+
+country_counts <- table(data$Audience.Country)
+
+# Convert the country counts to a data frame
+country_df <- data.frame(country = names(country_counts), count = as.numeric(country_counts))
+
+# Sort the data frame by count in descending order
+country_df <- country_df[order(country_df$count, decreasing = TRUE), ]
+
+# Create a pie chart
+pie_chart <- ggplot(country_df, aes(x = "", y = count, fill = country)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Distribution of Instagram Accounts
+       by Audience Country",
+       fill = "Audience Country") +
+  theme_void() +
+  theme(legend.position = "right")
+
+# Print the pie chart
+print(pie_chart)
+
+```
+Row
+----------------------------------
+
+
+### Category vs Country
+
+```{r}
+
+category_country_counts <- table(data$Category, data$Audience.Country)
+
+# Convert the counts to a data frame
+category_country_df <- as.data.frame.matrix(category_country_counts)
+
+# Convert row names to a column
+category_country_df$Country <- rownames(category_country_df)
+
+# Reshape the data to long format
+category_country_long <- tidyr::gather(category_country_df, key = "Category", value = "Count", -Country)
+
+# Create a stacked bar chart
+stacked_bar <- ggplot(category_country_long, aes(x = Country, y = Count, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(
+       x = "Country",
+       y = "Count") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 22),
+        axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 15),
+        axis.title = element_text(size = 18),
+        legend.title = element_blank())
+
+# Print the stacked bar chart
+print(stacked_bar)
+
+
+```
+
+### Engagement by Category
+
+```{r}
+boxplot <- ggplot(data, aes(x = Category, y = Engagement.1000s.)) +
+  geom_boxplot(data = subset(data, Engagement.1000s. < 4000), fill = "skyblue") +
+  labs(title = "Distribution of Authentic Engagement by Category",
+       x = "Category",
+       y = "Authentic Engagement") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 22),
+        axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 15),
+        axis.title = element_text(size = 18))
+
+# Print the boxplot
+print(boxplot)
+
+```
+
+
+Engagement & Followers
+=======================================
+
+### Engagement vs Followers
+
+```{r}
+ggplot(data, aes(x = Followers..Millions., y = Engagement.1000s.)) +
+  geom_point(data = subset(data, Engagement.1000s. < 3000 & Followers..Millions. < 150)) +
+  labs(title = "Followers vs. Authentic Engagement",
+       x = "no. of Followers (Millions)",
+       y = "Authentic Engagement (1000s)") +
+  theme_gray() +
+  theme(plot.title = element_text(size = 22),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title = element_text(size = 18))
+
+
+```
+
+
+
+### Engagement vs Followers vs Categories
+
+```{r}
+bubble_chart <- ggplot(data, aes(x = Category , y = Engagement.1000s., color = Followers..Millions.)) +
+  geom_point(data = subset(data, Engagement.1000s. < 4000), alpha = 0.7) +  # Set transparency for points
+  scale_size_continuous(range = c(3, 15)) +  # Adjust size range for bubbles
+  labs(
+       x = "Category",
+       y = "Engagement",
+       color = "Followers") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 22),
+        axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 15),
+        axis.title = element_text(size = 18))
+
+# Print the bubble chart
+print(bubble_chart)
+```
+
 
